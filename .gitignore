@@ -1,0 +1,4 @@
+/ChatClient/Release/*
+/.vs/*
+/ChatServer/Release/*
+/binr/*

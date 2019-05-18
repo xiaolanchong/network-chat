@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 11
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChatClient", "ChatClient\ChatClient.vcxproj", "{E854F7D8-920C-BDE4-4FEC-68D08AECC6E0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChatServer", "ChatServer\ChatServer.vcxproj", "{FBE93F01-BB89-2004-960C-B27B1209CF8C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+		Template|Win32 = Template|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E854F7D8-920C-BDE4-4FEC-68D08AECC6E0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E854F7D8-920C-BDE4-4FEC-68D08AECC6E0}.Debug|Win32.Build.0 = Debug|Win32
+		{E854F7D8-920C-BDE4-4FEC-68D08AECC6E0}.Release|Win32.ActiveCfg = Release|Win32
+		{E854F7D8-920C-BDE4-4FEC-68D08AECC6E0}.Release|Win32.Build.0 = Release|Win32
+		{E854F7D8-920C-BDE4-4FEC-68D08AECC6E0}.Template|Win32.ActiveCfg = Release|Win32
+		{E854F7D8-920C-BDE4-4FEC-68D08AECC6E0}.Template|Win32.Build.0 = Release|Win32
+		{FBE93F01-BB89-2004-960C-B27B1209CF8C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FBE93F01-BB89-2004-960C-B27B1209CF8C}.Debug|Win32.Build.0 = Debug|Win32
+		{FBE93F01-BB89-2004-960C-B27B1209CF8C}.Release|Win32.ActiveCfg = Release|Win32
+		{FBE93F01-BB89-2004-960C-B27B1209CF8C}.Release|Win32.Build.0 = Release|Win32
+		{FBE93F01-BB89-2004-960C-B27B1209CF8C}.Template|Win32.ActiveCfg = Template|Win32
+		{FBE93F01-BB89-2004-960C-B27B1209CF8C}.Template|Win32.Build.0 = Template|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
