@@ -5,6 +5,7 @@
 #include "ChatClient.h"
 #include "ChatClientDlg.h"
 #include "Address.h"
+#include "../common/Commands.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -138,7 +139,7 @@ BOOL CChatClientDlg::OnInitDialog()
 	GetDlgItem(IDC_FILE)->EnableWindow( FALSE );
 	char buf[100];
 	gethostname(buf, 100);
-	SetDlgItemText(IDC_EDITSERVER, buf);
+	SetDlgItemText(IDC_EDITSERVER, CA2T(buf));
 
 	m_dlg.Create(IDD_SOCKET_UDP_DIALOG);
 	m_dlg.ShowWindow(SW_HIDE);
@@ -197,13 +198,11 @@ HCURSOR CChatClientDlg::OnQueryDragIcon()
 void CChatClientDlg::OnConnect() 
 {
 	UpdateData();
-	char* Buf = new char[BYTES];
-	Buf = m_sServer.GetBuffer(1);
 	m_pClient = new CTSocket;
 	CString Message = m_sName;
 	int   nAdapter = 0;
 	CString IP = "";
-	HOSTENT* sh = gethostbyname(m_sServer);
+	HOSTENT* sh = gethostbyname(CT2A(m_sServer));
 	while (	sh->h_addr_list[nAdapter]  )
 	{
 		struct   sockaddr_in   adr;
@@ -212,7 +211,7 @@ void CChatClientDlg::OnConnect()
 		nAdapter++;
 	
 	}
-	if(m_pClient->Connect(IP.GetBuffer(IP.GetLength())))
+	if(m_pClient->Connect(CT2A(IP)))
 	{
 		m_bConnect = TRUE;
 		GetDlgItem(IDC_SEND)->EnableWindow( m_bConnect );
@@ -239,7 +238,7 @@ void CChatClientDlg::OnSend()
 		GetDlgItemText(IDC_EDITMESSAGE, temp);
 		Message+=temp;
 		m_pClient->SendText(Message, Message.GetLength());
-		SetDlgItemText(IDC_EDITMESSAGE, "");
+		SetDlgItemText(IDC_EDITMESSAGE, _T(""));
 	}	
 }
 
@@ -247,7 +246,7 @@ void CChatClientDlg::ClientThreadFunction(LPVOID Param)
 {
 	CChatClientDlg* pWnd = (CChatClientDlg*)Param;
 	
-	char* buf = new char[1024];
+	TCHAR* buf = new TCHAR[1024];
 	
 	CString csCommand="";
 	CString csNick;
@@ -258,14 +257,14 @@ void CChatClientDlg::ClientThreadFunction(LPVOID Param)
 		if(WSAGetLastError() != 0) return;
 		csCommand = buf;
 		csCommand.Delete(7,csCommand.GetLength()-7);
-		char* Nick = buf+7;
+		TCHAR* Nick = buf+7;
 		csNick = Nick;
 
 
 		if(csCommand == "ALL    ")
 		{
 			csNick = "";
-			for(int i=0;i< (strlen(buf)-7);i++)
+			for(int i=0;i< (_tcslen(buf)-7);i++)
 			{	
 				if(Nick[i] == '\n')
 				{
@@ -283,7 +282,7 @@ void CChatClientDlg::ClientThreadFunction(LPVOID Param)
 		
 		if(csCommand == "EXIST  ")
 		{
-			AfxMessageBox("пользователь с таким именем уже существует");
+			AfxMessageBox(_T("пользователь с таким именем уже существует"));
 			pWnd->m_bConnect = FALSE;
 			pWnd->GetDlgItem(IDC_SEND)->EnableWindow( FALSE );
 			pWnd->GetDlgItem(IDC_PRIVATE)->EnableWindow( FALSE );
@@ -295,9 +294,9 @@ void CChatClientDlg::ClientThreadFunction(LPVOID Param)
 			TerminateThread(pWnd->m_pClientThread, 0);
 
 		}
-		if(csCommand == "DISCONN")
+		if(csCommand == commands::c_disconnectUser)
 		{
-			AfxMessageBox("Вы отключены администратором чата");
+			AfxMessageBox(_T("Вы отключены администратором чата"));
 			pWnd->m_bConnect = FALSE;
 			pWnd->GetDlgItem(IDC_SEND)->EnableWindow( FALSE );
 			pWnd->GetDlgItem(IDC_CONNECT)->EnableWindow( TRUE );
@@ -325,11 +324,11 @@ void CChatClientDlg::ClientThreadFunction(LPVOID Param)
 		{
 			CString mes;
 			CString n(Nick);
-			CString to = n.Left(n.Find("\n"));
+			CString to = n.Left(n.Find(_T("\n")));
 			if(pWnd->m_sName != to)
 				continue;
 			n.Delete(0, to.GetLength()+1); // cut  /n
-			CString from = n.Left(n.Find("\n"));
+			CString from = n.Left(n.Find(_T("\n")));
 			n.Delete(0, from.GetLength()+1); // cut  /n
 			mes = "PM from ";
 			mes += from;
@@ -391,7 +390,7 @@ void CChatClientDlg::OnPrivate()
 	int sel = m_ListPeople.GetCurSel();
 	if(sel == LB_ERR)
 	{
-		AfxMessageBox("You must select user in list");
+		AfxMessageBox(_T("You must select user in list"));
 		return;
 	}
 	CString to;
@@ -415,7 +414,7 @@ void CChatClientDlg::OnPrivate()
 		Message+=text;
 		//Message+=" : ";
 		m_pClient->SendText(Message, Message.GetLength());
-		SetDlgItemText(IDC_EDITMESSAGE, "");
+		SetDlgItemText(IDC_EDITMESSAGE, _T(""));
 		Message = "PM to ";
 		Message += to;
 		Message += " : ";
@@ -435,12 +434,13 @@ void CChatClientDlg::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 void CChatClientDlg::OnSendfile() 
 {
+#ifdef FILE_SENDING
 	// TODO: Add your control notification handler code here
 	CString Message("GETHOST");
 	int sel = m_ListPeople.GetCurSel();
 	if(sel == LB_ERR)
 	{
-		AfxMessageBox("You must select user in list");
+		AfxMessageBox(_T("You must select user in list"));
 		return;
 	}
 	CString to;
@@ -456,4 +456,7 @@ void CChatClientDlg::OnSendfile()
 	Message += to;
 	if(m_bConnect)
 		m_pClient->SendText(Message, Message.GetLength());
+#else
+	AfxMessageBox(_T("File sending temporarily turned off"));
+#endif
 }

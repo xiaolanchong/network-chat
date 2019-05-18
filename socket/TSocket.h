@@ -24,8 +24,10 @@ public:
 	CTSocket(const SOCKET& sc);
 	virtual ~CTSocket();
 	BOOL SendText(const wchar_t* Buf, int Len);
+	BOOL SendData(const char* Buf, int Len);
 	BOOL ReceiveText(wchar_t* Buf);
-	BOOL Connect(char* ServerName);
+	BOOL ReceiveData(char* Buf);
+	BOOL Connect(const char* ServerName);
 	BOOL Listen();
 	BOOL Bind();
 	SOCKET Accept();

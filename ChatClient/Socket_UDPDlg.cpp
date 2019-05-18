@@ -31,7 +31,7 @@ CSocket_UDPDlg::CSocket_UDPDlg(bool bSend, SockAddr sa, CWnd* pParent /*=NULL*/)
 	// Note that LoadIcon does not require a subsequent DestroyIcon in Win32
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	if(!m_bSend)
-		m_hEvent = CreateEvent(NULL, FALSE, FALSE, "SyncEv15");
+		m_hEvent = CreateEvent(NULL, FALSE, FALSE, _T("SyncEv15"));
 }
 
 void CSocket_UDPDlg::DoDataExchange(CDataExchange* pDX)
@@ -104,8 +104,8 @@ BOOL CSocket_UDPDlg::OnInitDialog()
 //	m_wndSend.SetBkColor(RGB(256,128,128));
 //	m_wndRecv.SetWindowText("Done");
 //	m_wndRecv.SetShowPercent(TRUE);
-	m_wndRecv.SetTextFormat("Received %d%%", PBS_SHOW_PERCENT);
-	m_wndSend.SetTextFormat("Sent %d%%", PBS_SHOW_PERCENT);
+	m_wndRecv.SetTextFormat(_T("Received %d%%"), PBS_SHOW_PERCENT);
+	m_wndSend.SetTextFormat(_T("Sent %d%%"), PBS_SHOW_PERCENT);
 	m_wndRecv.SetGradientColors(RGB(255,0,0), RGB(0, 255,0));
 	m_wndSend.SetGradientColors(RGB(0,127,127), RGB(0, 0, 255));
 	m_wndRecv.SetRubberBar();
@@ -119,8 +119,8 @@ BOOL CSocket_UDPDlg::OnInitDialog()
 		m_pServerThread=AfxBeginThread((AFX_THREADPROC)ServerThreadFunc, this);
 		GetDlgItem(IDC_EDIT_SEND)->EnableWindow(FALSE);
 		GetDlgItem(IDC_BUTTON_FILE)->EnableWindow(FALSE);
-		GetDlgItem(IDC_BUTTON_SEND)->SetWindowText(CString("Принять"));
-		m_hValid = CreateEvent(NULL, FALSE, FALSE, "SyncServer");
+		GetDlgItem(IDC_BUTTON_SEND)->SetWindowText(_T("Принять"));
+		m_hValid = CreateEvent(NULL, FALSE, FALSE, _T("SyncServer"));
 	}
 	else
 	{
@@ -128,7 +128,7 @@ BOOL CSocket_UDPDlg::OnInitDialog()
 		ShowWindow(SW_HIDE);
 		GetDlgItem(IDC_EDIT_SAVEDIR)->EnableWindow(FALSE);
 		GetDlgItem(IDC_PATH)->EnableWindow(FALSE);
-		m_hValid = CreateEvent(NULL, FALSE, FALSE, "SyncClient");
+		m_hValid = CreateEvent(NULL, FALSE, FALSE, _T("SyncClient"));
 //		GetDlgItem(IDC_BUTTON_SEND)->EnableWindow(FALSE);
 	}
 	return TRUE;  // return TRUE  unless you set the focus to a control
@@ -189,12 +189,12 @@ void CSocket_UDPDlg::OnButtonSend()
 	UpdateData(true);
 	if(m_SaveDir.IsEmpty() && !m_bSend)
 	{
-		AfxMessageBox("Write directory for files");
+		AfxMessageBox(_T("Write directory for files"));
 		return;
 	}
 	if(m_File.IsEmpty() && m_bSend)
 	{
-		AfxMessageBox("Write file name");
+		AfxMessageBox(_T("Write file name"));
 		return;
 	}
 	GetDlgItem(IDC_BUTTON_SEND)->EnableWindow(FALSE);
@@ -242,7 +242,7 @@ void CSocket_UDPDlg::ServerThreadFunc(LPVOID pParam)
 	}
 	catch(std::exception& ex)
 	{
-		AfxMessageBox(ex.what());
+		AfxMessageBox(CA2T(ex.what()));
 		return;
 	}
 	cs.Close();
@@ -263,7 +263,7 @@ void CSocket_UDPDlg::ClientThreadFunc(LPVOID  Param)
 	}
 	catch(std::exception& ex)
 	{
-		AfxMessageBox(ex.what());
+		AfxMessageBox(CA2T(ex.what()));
 	}
 }
 
@@ -272,7 +272,7 @@ void CSocket_UDPDlg::OnButtonFile()
 	// TODO: Add your control notification handler code here
 		// TODO: Add your control notification handler code here
 	UpdateData(true);
-	CFileDialog FileDialog(TRUE, NULL ,"*.*", OFN_ALLOWMULTISELECT, "All files(*.*)");
+	CFileDialog FileDialog(TRUE, NULL , _T("*.*"), OFN_ALLOWMULTISELECT, _T("All files(*.*)"));
 	if(FileDialog.DoModal() == IDOK)
 		m_File=FileDialog.GetPathName();
 	UpdateData(false);
@@ -288,7 +288,7 @@ void CSocket_UDPDlg::OnPath()
 	bi.hwndOwner = GetSafeHwnd();
     bi.pidlRoot = NULL;
     bi.pszDisplayName = szPath;
-    bi.lpszTitle = "Choose a folder";
+    bi.lpszTitle = _T("Choose a folder");
     bi.ulFlags = 0;
     bi.lpfn = NULL;
     bi.lParam = 0;

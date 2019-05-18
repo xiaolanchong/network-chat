@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include "ChatServer.h"
 #include "ChatServerDlg.h"
+#include "../common/Utils.h"
+#include "../common/Commands.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -198,8 +200,8 @@ void CChatServerDlg::OnKick()
 				{
 					TerminateThread (m_ListThread.at(j).m_pServerThread,0);
 					m_ListThread.erase(m_ListThread.begin()+j);
-					CString Message = "DISCONN";
-					send(m_ServerList.at(j).m_Socket, reinterpret_cast<const char*>(Message.GetString()), Message.GetLength(),0);
+					CString Message = commands::c_disconnectUser;
+					utils::SendString(m_ServerList.at(j).m_Socket, Message);
 					m_ServerList.erase(m_ServerList.begin()+j);
 					break;
 				}
@@ -208,7 +210,7 @@ void CChatServerDlg::OnKick()
 			for(int k=0;k<m_ServerList.size();k++)
 			{
 				CString Message = "REMOVE " + Nick;
-				send(m_ServerList.at(k).m_Socket, Message.GetBuffer(Message.GetLength()), Message.GetLength(),0);
+				utils::SendString(m_ServerList.at(k).m_Socket, Message);
 			}
 
 		
@@ -269,7 +271,7 @@ void CChatServerDlg::ServerThreadFunc(LPVOID param)
 			{
 				CString Message = "REMOVE ";
 				Message+=Nick;
-				send(pWnd->m_ServerList.at(k).m_Socket, Message.GetBuffer(Message.GetLength()), Message.GetLength(),0);
+				utils::SendString(pWnd->m_ServerList.at(k).m_Socket, Message);
 			}
 			for(int j=0;j<pWnd->m_ListPeople.GetCount();j++)
 			{
@@ -292,7 +294,7 @@ void CChatServerDlg::ServerThreadFunc(LPVOID param)
 			{
 				CString Message = "MESSAGE";
 				Message+=Nick;
-				send(pWnd->m_ServerList.at(k).m_Socket,Message.GetBuffer(Message.GetLength()), Message.GetLength(), 0);
+				utils::SendString(pWnd->m_ServerList.at(k).m_Socket,Message);
 			}
 		}
 		if(csCommand == "PRIVMES")
@@ -310,7 +312,7 @@ void CChatServerDlg::ServerThreadFunc(LPVOID param)
 				CString Message = _T("PRIVMES");
 				Message+=Nick;
 			//	if(to == pWnd->m_ServerList.at(k).m_Nick)
-					send(pWnd->m_ServerList.at(k).m_Socket,Message.GetBuffer(Message.GetLength()), Message.GetLength(), 0);
+				utils::SendString(pWnd->m_ServerList.at(k).m_Socket,Message);
 			}
 		}
 		if(csCommand == "GETHOST")
@@ -322,7 +324,7 @@ void CChatServerDlg::ServerThreadFunc(LPVOID param)
 			CString all = _T("GH to ");
 			all += Nick;
 			pWnd->m_ListChat.AddString(all);
-			char buf[7+ sizeof(sockaddr)]="SETHOST";
+			char buf[commands::c_commandLength + sizeof(sockaddr)]="SETHOST";
 			SOCKET peer;
 			for(int k=0;k<pWnd->m_ServerList.size();k++)
 			{
@@ -338,7 +340,7 @@ void CChatServerDlg::ServerThreadFunc(LPVOID param)
 					int namlen = sizeof(sockaddr);
 					sockaddr nam ;
 					getpeername(peer, &nam, &namlen);
-					memcpy(buf+7, &nam, sizeof(sockaddr));
+					memcpy(buf+ commands::c_commandLength, &nam, sizeof(sockaddr));
 					send(pWnd->m_ServerList.at(k).m_Socket,buf, sizeof(buf), 0);
 				}
 			}
@@ -378,7 +380,7 @@ void CChatServerDlg::ServerMainThreadFunc(LPVOID param)
 		for(int p=0;p<pWnd->m_ServerList.size();p++)
 			if(pWnd->m_ServerList.at(p).m_Nick == Nick)
 			{
-				pWnd->m_pSocket->SendText("EXIST  ", 8);
+				pWnd->m_pSocket->SendText(_T("EXIST  "), 8);
 				Exist = TRUE;
 				break;
 			}
@@ -389,7 +391,7 @@ void CChatServerDlg::ServerMainThreadFunc(LPVOID param)
 			for(int i=0;i<pWnd->m_ServerList.size();i++)
 			{
 				CString Message = "ADD    " + Nick;
-				send(pWnd->m_ServerList.at(i).m_Socket ,Message.GetBuffer(Message.GetLength()) ,Message.GetLength(), 0 );
+				utils::SendString(pWnd->m_ServerList.at(i).m_Socket ,Message);
 			}
 			pWnd->m_ServerList.push_back(SERVERLISTCLIENT(New, IP, buf, TRUE));
 
@@ -399,7 +401,7 @@ void CChatServerDlg::ServerMainThreadFunc(LPVOID param)
 				All+= pWnd->m_ServerList.at(j).m_Nick;
 				All+='\n';
 			}
-			send(New ,All.GetString() ,All.GetLength() * sizeof(wchar_t), 0 );
+			utils::SendString(New ,All);
 			CWinThread* thread = AfxBeginThread((AFX_THREADPROC)ServerThreadFunc, param);
 			pWnd->m_ListThread.push_back(LISTTHREAD(thread,Nick));
 		}
@@ -413,8 +415,8 @@ void CChatServerDlg::OnClose()
 	
 	for(int j=0;j<m_ServerList.size();j++)
 	{
-		CString Message = "DISCONN";
-		send(m_ServerList.at(j).m_Socket, Message.GetBuffer(Message.GetLength()), Message.GetLength(),0);
+		CString Message = commands::c_disconnectUser;
+		utils::SendString(m_ServerList.at(j).m_Socket, Message);
 		
 	}
 	for(int j=0;j<m_ServerList.size();j++)

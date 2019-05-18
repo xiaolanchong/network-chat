@@ -57,7 +57,7 @@ class CFileSocket : public CBlockingSocket
 	};
 	bool	Valid(bool server)
 	{
-		HANDLE hEv = OpenEvent(EVENT_ALL_ACCESS, TRUE, server? "SyncServer": "SyncClient");
+		HANDLE hEv = OpenEvent(EVENT_ALL_ACCESS, TRUE, server? _T("SyncServer"): _T("SyncClient"));
 		if(!hEv)  return false;
 		CloseHandle(hEv);
 		return true;

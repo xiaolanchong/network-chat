@@ -133,6 +133,7 @@ bool	CFileSocket::ReceiveFile( CSignal& sign)
 
 bool	CFileSocket::SendFile(CString& name, CSignal& sign)
 {
+#ifdef FILE_SENDING
 	const int buflen = 1200;
 	CFile	File;
 	CString temp;
@@ -218,5 +219,8 @@ bool	CFileSocket::SendFile(CString& name, CSignal& sign)
 	sign.quit();
 	File.Close();
 	return true;
+#else
+	return false;
+#endif
 }
 

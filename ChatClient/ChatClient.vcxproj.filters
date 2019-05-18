@@ -94,6 +94,12 @@
     <ClInclude Include="..\socket\TSocket.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\Commands.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\Utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\ChatClient.ico">

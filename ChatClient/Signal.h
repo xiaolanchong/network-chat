@@ -63,7 +63,7 @@ public:
 		//CString str;
 		pWnd->SetDlgItemText(IDC_EDIT_SEND, name);
 		pWnd->UpdateData(TRUE);
-		HANDLE Event = OpenEvent(EVENT_ALL_ACCESS,TRUE,"SyncEv15");
+		HANDLE Event = OpenEvent(EVENT_ALL_ACCESS,TRUE, _T("SyncEv15"));
 		DWORD res = WaitForSingleObject(Event, 20*1000) ;
 
 		if(res == WAIT_TIMEOUT || res == WAIT_ABANDONED)

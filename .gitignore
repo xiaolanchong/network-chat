@@ -2,3 +2,9 @@
 /.vs/*
 /ChatServer/Release/*
 /binr/*
+/ChatServer/Debug/*
+/ChatClient/Debug/*
+/bin/*
+/ChatClient/ChatClient.vcxproj.user
+/ChatServer/ChatServer.vcxproj.user
+/chat.v11.suo

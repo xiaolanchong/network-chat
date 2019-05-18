@@ -75,7 +75,7 @@ SOCKET CTSocket::Accept()
 	return accept(m_Socket, (LPSOCKADDR)&from, &fromlen);
 }
 
-BOOL CTSocket::Connect(char* ServerName)
+BOOL CTSocket::Connect(const char* ServerName)
 {
 	SOCKADDR_IN socketaddr;
 	
@@ -104,22 +104,37 @@ BOOL CTSocket::SendText(const wchar_t* Buf, int Len)
 	return TRUE;
 }
 
+BOOL CTSocket::SendData(const char* Buf, int Len)
+{
+	send(m_Socket, reinterpret_cast<const char*>(Buf), Len, 0);
+	return TRUE;
+}
+
+
 BOOL CTSocket::ReceiveText(wchar_t* Buf)
 {
 	ZeroMemory(Buf, m_BytesSend * sizeof(wchar_t));
-	recv(m_Socket, Buf, m_BytesSend,0);
+	recv(m_Socket, reinterpret_cast<char*>(Buf), m_BytesSend * sizeof(wchar_t),0);
+	return TRUE;
+}
+
+BOOL CTSocket::ReceiveData(char* Buf)
+{
+	ZeroMemory(Buf, m_BytesSend);
+	recv(m_Socket, reinterpret_cast<char*>(Buf), m_BytesSend * sizeof(wchar_t), 0);
 	return TRUE;
 }
 
 BOOL CTSocket::SendFile(CString FileName)
 {
+#ifdef FILE_SENDING
 	CFile File;
-	wchar_t* buffor = new wchar_t[BYTES];
+	char* buffor = new char[BYTES];
 	CString tempfor;
-	int blockSize = BYTES * ;
+	int blockSize = BYTES ;
 	CString temp;
 	CString tempString;
-	wchar_t* buf = new wchar_t[blockSize];
+	char* buf = new char[blockSize];
 	ZeroMemory(buf, sizeof(wchar_t)* blockSize);
 	File.Open(FileName, CFile::modeRead);
 
@@ -131,7 +146,7 @@ BOOL CTSocket::SendFile(CString FileName)
 	ZeroMemory(LastBuf, sizeof(LastBuf));
 
 //имя файла
-	SendText(CT2A(FileName), FileName.GetLength());
+	SendText((FileName), FileName.GetLength());
 	ReceiveText(buffor);
 	tempfor = buffor;
 	if(tempfor != "OK_NAME")
@@ -141,12 +156,12 @@ BOOL CTSocket::SendFile(CString FileName)
 	}
 	tempString.Format(_T("%d"), FileLength);
 //длина файла
-	SendText(CT2A(tempString), tempString.GetLength());
+	SendText((tempString), tempString.GetLength());
 	ReceiveText(buffor);
 	tempfor = buffor;
 	if(tempfor != "OK_LEN")
 	{
-		AfxMessageBox("потеря длины");
+		AfxMessageBox(_T("потеря длины"));
 		return FALSE;
 	}
 	temp.Format(_T("%d"), LastBlockSize);
@@ -156,7 +171,7 @@ BOOL CTSocket::SendFile(CString FileName)
 	tempfor = buffor;
 	if(tempfor != "OK_LASTLEN")
 	{
-		AfxMessageBox("потеря послед. длины");
+		AfxMessageBox(_T("потеря послед. длины"));
 		return FALSE;
 	}
 	int i=0;
@@ -170,44 +185,48 @@ BOOL CTSocket::SendFile(CString FileName)
 		tempfor = buffor;
 		if(tempfor != "OK")
 		{
-			AfxMessageBox("потеря данных");
+			AfxMessageBox(_T("потеря данных"));
 			return FALSE;
 		}
 		i++;
 	}
 
-	SendText("LAST_BLOCK", 10);
+	SendText(_T("LAST_BLOCK"), 10);
 	ReceiveText(buffor);
 		tempfor = buffor;
 		if(tempfor != "LASTBLOCK")
 		{
-			AfxMessageBox("LASTBLOCK");
+			AfxMessageBox(_T("LASTBLOCK"));
 			return FALSE;
 		}
 	if(LastBlockSize!=0)
 	{
 		File.Read(LastBuf, LastBlockSize);
-		SendText(LastBuf, LastBlockSize);
+		SendData(LastBuf, LastBlockSize);
 		ReceiveText(buffor);
 		tempfor = buffor;
 		if(tempfor != "OK_LASTBLOCK")
 		{
-			AfxMessageBox("потеря последнего блока");
+			AfxMessageBox(_T("потеря последнего блока"));
 			return FALSE;
 		}
 	}
 
-	SendText("FILE_END", 8);
+	SendText(_T("FILE_END"), 8);
 	File.Close();
 	m_Progress->SetPos(0);
 	delete buf;
 	delete buffor;
 	delete LastBuf;
 	return TRUE;
+#else
+	return FALSE;
+#endif
 }
 
 BOOL CTSocket::ReceiveFile(CString FileName)
 {
+#ifdef FILE_SENDING
 	CFile file;
 	CFileException e;
 	CString buf, tempString;
@@ -217,14 +236,14 @@ BOOL CTSocket::ReceiveFile(CString FileName)
 	int addrlen = sizeof(m_sockaddr);
 //длина файла
 	ReceiveText(tempBuf);
-	SendText("OK_LEN", 6);
+	SendText(_T("OK_LEN"), 6);
 	int FileLength =  atoi(tempBuf);
 	int BlockCount = FileLength/m_BytesSend;
 	int i=0;
 
 //длина последнего блока
 	ReceiveText(tempBuf);
-	SendText("OK_LASTLEN", 10);
+	SendText(_T("OK_LASTLEN"), 10);
 	LastBlockCount =  atoi(tempBuf);
 	file.Open(FileName, CFile::modeCreate | CFile::modeWrite, &e);
 	for(;;)
@@ -233,18 +252,18 @@ BOOL CTSocket::ReceiveFile(CString FileName)
 		ReceiveText(tempBuf);
 		tempString = tempBuf;
 		if(tempString == "LAST_BLOCK")break;
-		SendText("OK", 2);
+		SendText(_T("OK"), 2);
 		file.Write(tempBuf, m_BytesSend);
 		i++;		
 	}
-	SendText("LASTBLOCK", 9);
+	SendText(_T("LASTBLOCK"), 9);
 	if(i != BlockCount)
 		AfxMessageBox(_T("LOST DATE"));
 	if(LastBlockCount!=0)
 	{
 		
 		ReceiveText(tempBuf);
-		SendText("OK_LASTBLOCK", 12);		
+		SendText(_T("OK_LASTBLOCK"), 12);
 		file.Write(tempBuf, LastBlockCount);
 		
 	}
@@ -261,4 +280,7 @@ BOOL CTSocket::ReceiveFile(CString FileName)
 	m_Progress->SetPos(0);
 	delete[] tempBuf;
 	return TRUE;
+#else
+	return FALSE;
+#endif
 }

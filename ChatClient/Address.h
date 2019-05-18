@@ -23,6 +23,10 @@ struct SockAddr : public sockaddr_in
 		sin_port	=	htons(port);
 		sin_addr.S_un.S_addr	=	addr;
 	}
+	SockAddr(unsigned short port, const wchar_t* str)
+		: SockAddr(port, CW2A(str))
+	{
+	}
 	SockAddr(unsigned short port, const char* str)
 	{
 		memset(static_cast<sockaddr_in*>(this), 0, sizeof(sockaddr_in));

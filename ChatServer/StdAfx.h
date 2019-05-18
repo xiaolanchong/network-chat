@@ -26,4 +26,6 @@
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
+#undef FILE_SENDING
+
 #endif // !defined(AFX_STDAFX_H__41FB69C9_CFE1_4A7E_B7D7_FC60BEBE2D14__INCLUDED_)
